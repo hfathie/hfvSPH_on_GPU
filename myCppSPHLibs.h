@@ -428,4 +428,36 @@ __global__ void hprevious_updater(float *hprevious, float *h, int N){
 }
 
 
+//===========================================================
+//=================== dt estimation =========================
+//===========================================================
+__global__ void dt_array(float *accx, float *accy, float *accz, float *accx_tot,
+                         float *accy_tot, float *accz_tot, float *h, float *csnd,
+                         float *abs_acc_g, float *abs_acc_tot, float *v_sig,
+                         float * divV, float *dh_dt, int N){
+
+    int i = threadIdx.x + blockIdx.x * blockDim.x;
+
+    if(i < N){
+
+        abs_acc_g[i] = sqrt(accx[i]*accx[i] + accy[i]*accy[i] + accz[i]*accz[i]);
+
+        abs_acc_tot[i] = sqrt(accx_tot[i]*accx_tot[i] + accy_tot[i]*accy_tot[i] + accz_tot[i]*accz_tot[i]);
+
+        float max_h = 0.0f;
+        float tmp = 0.0f;
+        for(int j = 0; j < N; j++){
+
+            tmp = max(csnd[i], csnd[j]);
+
+            if(tmp > max_h){
+                max_h = tmp;
+            }
+        }
+        v_sig[i] = max_h;
+
+        dh_dt[i] = h[i] / abs(1.0f/3.0f * h[i] * divV[i]); //See the line below eq.31 in Gadget 2 paper.
+    }
+}
+
 #endif
