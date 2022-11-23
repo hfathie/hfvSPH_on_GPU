@@ -434,7 +434,7 @@ __global__ void hprevious_updater(float *hprevious, float *h, int N){
 __global__ void dt_array(float *accx, float *accy, float *accz, float *accx_tot,
                          float *accy_tot, float *accz_tot, float *h, float *csnd,
                          float *abs_acc_g, float *abs_acc_tot, float *v_sig,
-                         float * divV, float *dh_dt, int N){
+                         float *divV, float *dh_dt, int N){
 
     int i = threadIdx.x + blockIdx.x * blockDim.x;
 
