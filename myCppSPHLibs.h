@@ -460,4 +460,67 @@ __global__ void dt_array(float *accx, float *accy, float *accz, float *accx_tot,
     }
 }
 
+
+//===================================================
+//============ getPressure (Kitsonias) ==============
+//===================================================
+__global__ void getPressure_Kitsonias(float *P, float *rho, float UnitDensity_in_cgs,
+                                      float Unit_P_in_cgs, float gammah, int N){
+
+    int i = threadIdx.x + blockIdx.x * blockDim.x;
+
+    if(i < N){
+
+        float const c_0 = 43672.48;
+        float const rho_0 = 2.72e-20;
+        float const c_s = 0.2e5;
+        float const rho_1 = 1.0e-14;
+
+        float rhot = rho[i] * UnitDensity_in_cgs;
+
+        if(rhot <= rho_0){
+            P[i] = rhot * c_0 * c_0 / Unit_P_in_cgs;
+        }
+
+        if(rhot > rho_0){
+            P[i] = rhot * ((c_0*c_0 - c_s*c_s)*pow((rhot/rho_0), (-2.0f/3.0f))) *
+                          sqrt(1.0f + pow((rhot/rho_1), (4.0f/3.0f)))/Unit_P_in_cgs;
+        }
+
+    }
+
+}
+
+
+//===============================================
+//============ getCsound (Kitsonias) ============
+//===============================================
+__global__ void getCsound_Kitsonias(float *csnd, float *rho, float UnitDensity_in_cgs,
+                                      float unitVelocity, float gammah, int N){
+
+    int i = threadIdx.x + blockIdx.x * blockDim.x;
+
+    if(i < N){
+
+        float const c_0 = 43672.48;
+        float const rho_0 = 2.72e-20;
+        float const c_s = 0.2e5;
+        float const rho_1 = 1.0e-14;
+
+        float rhot = rho[i] * UnitDensity_in_cgs;
+
+        if(rhot <= rho_0){
+            csnd[i] = c_0/unitVelocity;
+        }
+
+        if(rhot > rho_0){
+            csnd[i] = sqrt(((c_0*c_0 - c_s*c_s)*pow((rhot/rho_0), (-2.0f/3.0f))) *
+                      sqrt(1.0f + pow((rhot/rho_1), (4.0f/3.0f))))/unitVelocity;
+        }
+
+    }
+
+}
+
+
 #endif
